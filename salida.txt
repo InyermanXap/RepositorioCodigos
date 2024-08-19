@@ -1,0 +1,9 @@
+Inyerman
+Nombre: Inyerman
+Numero ingresado: 1
+Factorial: 1
+
+Nombre: Alexander
+Numero ingresado: 2
+Factorial: 2
+
