@@ -19,7 +19,7 @@ int main(){
         system("clear");
         printf("Menú:\n");
         printf("1.Ingresar datos\n");
-        printf("Mostrar historia\n");
+        printf("2Mostrar historia\n");
         printf("3.Salir\n");
         printf("Seleccione una opción:");
         scanf("%d",&opcion);
