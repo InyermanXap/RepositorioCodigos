@@ -1,24 +1,15 @@
-Nombre:inyerman
-Placa:357dpj
-Total de compra:145.00
-Nombre:Inyerman
-Placa:357DPJ
-Total de compra:145.00
-Nombre:inyerman
-Placa:357dpj
-Total de compra:203.00
-Nombre:Inyerman
-Placa:357dpj
-Total de compra:270.00
-Nombre:Inyerman
-Placa:357dpj
-Total de compra:288.00
-Nombre:inyerman
-Placa:357dpj
-Total de compra:145.00
-Nombre:inyerman
-Placa:357dpj
-Total de compra:150.00
-Nombre:inyerman
-Placa:357dpj
-Total de compra:160.00
+Nombre:    josue
+Placa: 357dpj
+Total de compra:   15.00
+Nit:   cf
+Estancia en el parqueo:    -23.00 horas
+Nombre:    alexander
+Placa: 357dpj
+Total de compra:   15.00
+Nit:   cf
+Estancia en el parqueo:    0.00 horas
+Nombre:    inyerman
+Placa: 357dpj
+Total de compra:   35.00
+Nit:   cf
+Estancia en el parqueo:    2.00 horas
