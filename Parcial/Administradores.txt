@@ -1,0 +1,3 @@
+Cargo	Contraseña	Nombre	Apellido	DPI	Telefono	Correo
+Administrador	Goku360	Inyerman	Xap	3000305680101	49925704	inyermanxap@gmail.com
+ 

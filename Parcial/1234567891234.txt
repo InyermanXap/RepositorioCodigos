@@ -1,0 +1,1 @@
+No.Viajes	Kilometros	Salario	Ganancia empresa	Ganancia Taxista
