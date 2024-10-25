@@ -38,7 +38,6 @@ def Crear_base_de_datos():
 Ventana_iniciar_sesion_administrador_abierta = None
 Ventana_iniciar_sesion_texista_abierta = None
 Ventana_registrar_taxista_abierta = None
-Ventana_registrar_taxista_abierta = None
 Ventana_menu_taxi_abierta = None
 Ventana_ingreso_viajes_abierta = None
 Ventana_menu_administrador_abierta = None
@@ -49,8 +48,35 @@ Ventana_estado_abierta = None
 Ventana_añadir_taxi = None
 ventana_recuperar_abierta = None
 ventana_solicitud_abierta = None
+Ventana_encuesta_abierta = None
+Ventana_Llenar_encuesta_abierta = None
 
 
+
+def generar_codigo():
+    ultimo_codigo = 0  # Valor inicial en caso de que no existan códigos aún
+
+    # Verificar si el archivo ya existe
+    if os.path.exists(BD_Codigos):
+        with open(BD_Codigos, "r") as archivo:
+            next(archivo)  # Saltar el encabezado
+            for linea in archivo:
+                if linea.strip():  # Asegurarse de que la línea no esté vacía
+                    campos = linea.split("\t")
+                    if len(campos) > 0 and campos[0].strip().isdigit():  # Verificar que haya columnas y que el primer campo sea un número
+                        ultimo_codigo = int(campos[0].strip())  # Obtener el último número de código registrado
+    
+    nuevo_codigo = ultimo_codigo + 1  # Incrementar el código
+
+    # Agregar el nuevo código al archivo con el estado 'Disponible'
+    with open(BD_Codigos, "a") as archivo:
+        # Si el archivo es nuevo, agregar el encabezado
+        if os.path.getsize(BD_Codigos) == 0:
+            archivo.write("No.codigo\tEstado\n")
+        
+        archivo.write(f"{nuevo_codigo}\tDisponible\n")
+
+    return nuevo_codigo
 #Ventana Añadir Taxi
 def Añadir_taxi():
     # Ventana principal para añadir taxi
@@ -610,7 +636,8 @@ def generar_factura(DPI_taxista, Texto_kilometro_recorrido, Texto_NIT_cliente, T
     correo_cliente = Texto_correo_cliente.get()
     nombre_cliente = Texto_Nombre_cliente.get()
     Direccion_cliente = Texto_Direccion_cliente.get()
-
+    nuevo_codigo = generar_codigo()
+    print(f"Se ha generado el nuevo código: {nuevo_codigo}")
     # Obtener y actualizar el número de factura
     numero_factura = incrementar_numero_factura()
 
@@ -639,6 +666,7 @@ def generar_factura(DPI_taxista, Texto_kilometro_recorrido, Texto_NIT_cliente, T
     pdf.cell(200, 10, f'NIT del Cliente: {NIT_cliente}', ln=True)
     pdf.cell(200, 10, f'Nombre del Cliente: {nombre_cliente}', ln=True)
     pdf.cell(200, 10, f'Dirección del Cliente: {Direccion_cliente}', ln=True)
+    pdf.cell(200, 10, f'Codigo de Viaje: {nuevo_codigo}', ln=True)
 
     # Línea separadora
     pdf.ln(10)
@@ -660,7 +688,7 @@ def generar_factura(DPI_taxista, Texto_kilometro_recorrido, Texto_NIT_cliente, T
 
     print(f"Factura #{numero_factura} generada correctamente en {nombre_pdf}")
     enviar_factura_por_correo(correo_cliente, nombre_pdf)
-
+    
 def obtener_numero_viajes(DPI_taxista):
     nombre_archivo = f'{DPI_taxista.replace(" ", "_")}.txt'
     
@@ -1113,6 +1141,164 @@ def Solicitud_cliente(texto_correo_cliente, texto_numero_cliente, texto_NIT_clie
     # Llamar a la función para enviar el correo
     enviar_correo_taxista(correo_destinatario_cliente, asunto, mensaje)
     messagebox.showinfo("Aviso",f"Su taxista ha sido informado")
+
+def guardar_datos_encuesta_txt(calificacion_1, calificacion_2, calificacion_3, calificacion_4, recomendacion, comentarios):
+    nombre_archivo = "encuestas.txt"
+    
+    with open(nombre_archivo, mode='a', encoding='utf-8') as archivo_txt:
+        archivo_txt.write("Encuesta de Satisfacción:\n")
+        archivo_txt.write(f"1. Actitud del taxista: {calificacion_1}\n")
+        archivo_txt.write(f"2. Condiciones del taxi: {calificacion_2}\n")
+        archivo_txt.write(f"3. Limpieza del taxi: {calificacion_3}\n")
+        archivo_txt.write(f"4. Rapidez del taxista en llegar: {calificacion_4}\n")
+        archivo_txt.write(f"5. Recomendación: {recomendacion}\n")
+        archivo_txt.write(f"6. Comentarios adicionales: {comentarios}\n")
+        archivo_txt.write("-" * 40 + "\n")  # Separador entre encuestas
+    
+    print("Respuestas guardadas exitosamente en un archivo de texto.")
+
+# Función para mostrar la ventana de la encuesta de satisfacción
+def Ventana_Llenar_encuesta(Texto_codigo):
+    codigo_viaje = Texto_codigo.get()
+
+    # Simulación de verificación del código
+    if not verificar_codigo_disponible(codigo_viaje):
+        messagebox.showerror("Error", "El código ingresado no está disponible o ya ha sido utilizado.")
+        return
+
+    # Crear la ventana para la encuesta
+    Ventana_Llenar_encuesta_abierta = tk.Toplevel()
+    Ventana_Llenar_encuesta_abierta.title("Encuesta de Satisfacción")
+    Ventana_Llenar_encuesta_abierta.geometry("400x600")
+
+    # Pregunta 1: Actitud del taxista
+    label_pregunta_1 = tk.Label(Ventana_Llenar_encuesta_abierta, text="¿Cómo calificaría la actitud del taxista?")
+    label_pregunta_1.pack(pady=5)
+    respuesta_1 = tk.StringVar()  
+    opciones_pregunta_1 = ["Excelente", "Bueno", "Regular", "Malo"]
+    for opcion in opciones_pregunta_1:
+        tk.Radiobutton(Ventana_Llenar_encuesta_abierta, text=opcion, variable=respuesta_1, value=opcion).pack()
+
+    # Pregunta 2: Condiciones del taxi
+    label_pregunta_2 = tk.Label(Ventana_Llenar_encuesta_abierta, text="¿Cómo calificaría las condiciones del taxi?")
+    label_pregunta_2.pack(pady=5)
+    respuesta_2 = tk.StringVar()  
+    opciones_pregunta_2 = ["Excelente", "Bueno", "Regular", "Malo"]
+    for opcion in opciones_pregunta_2:
+        tk.Radiobutton(Ventana_Llenar_encuesta_abierta, text=opcion, variable=respuesta_2, value=opcion).pack()
+
+    # Pregunta 3: Limpieza del taxi
+    label_pregunta_3 = tk.Label(Ventana_Llenar_encuesta_abierta, text="¿Cómo calificaría la limpieza del taxi?")
+    label_pregunta_3.pack(pady=5)
+    respuesta_3 = tk.StringVar()  
+    opciones_pregunta_3 = ["Excelente", "Bueno", "Regular", "Malo"]
+    for opcion in opciones_pregunta_3:
+        tk.Radiobutton(Ventana_Llenar_encuesta_abierta, text=opcion, variable=respuesta_3, value=opcion).pack()
+
+    # Pregunta 4: Rapidez del taxista en llegar
+    label_pregunta_4 = tk.Label(Ventana_Llenar_encuesta_abierta, text="¿Cómo calificaría la rapidez del taxista en llegar?")
+    label_pregunta_4.pack(pady=5)
+    respuesta_4 = tk.StringVar()  
+    opciones_pregunta_4 = ["Excelente", "Bueno", "Regular", "Malo"]
+    for opcion in opciones_pregunta_4:
+        tk.Radiobutton(Ventana_Llenar_encuesta_abierta, text=opcion, variable=respuesta_4, value=opcion).pack()
+
+    # Pregunta 5: Recomendación
+    label_pregunta_5 = tk.Label(Ventana_Llenar_encuesta_abierta, text="¿Recomendaría nuestro servicio a otras personas?")
+    label_pregunta_5.pack(pady=5)
+    respuesta_5 = tk.StringVar()  
+    opciones_pregunta_5 = ["Sí", "No"]
+    for opcion in opciones_pregunta_5:
+        tk.Radiobutton(Ventana_Llenar_encuesta_abierta, text=opcion, variable=respuesta_5, value=opcion).pack()
+
+    # Pregunta 6: Comentarios adicionales
+    label_pregunta_6 = tk.Label(Ventana_Llenar_encuesta_abierta, text="Comentarios adicionales:")
+    label_pregunta_6.pack(pady=5)
+    texto_comentarios = tk.Text(Ventana_Llenar_encuesta_abierta, height=4, width=40)
+    texto_comentarios.pack(pady=5)
+
+    # Función para enviar las respuestas
+    def enviar_respuestas():
+        calificacion_1 = respuesta_1.get()
+        calificacion_2 = respuesta_2.get()
+        calificacion_3 = respuesta_3.get()
+        calificacion_4 = respuesta_4.get()
+        recomendacion = respuesta_5.get()
+        comentarios = texto_comentarios.get("1.0", tk.END).strip()
+
+        # Validar que todas las preguntas se respondan (excepto comentarios)
+        if not (calificacion_1 and calificacion_2 and calificacion_3 and calificacion_4 and recomendacion):
+            messagebox.showerror("Error", "Por favor, responde todas las preguntas.")
+            return
+
+        # Guardar las respuestas en el archivo de texto
+        guardar_datos_encuesta_txt(calificacion_1, calificacion_2, calificacion_3, calificacion_4, recomendacion, comentarios)
+
+        # Mostrar mensaje de éxito y cerrar la ventana
+        messagebox.showinfo("Gracias", "Gracias por completar la encuesta.")
+        Ventana_Llenar_encuesta_abierta.destroy()
+
+    # Botón para enviar las respuestas
+    boton_enviar = tk.Button(Ventana_Llenar_encuesta_abierta, text="Enviar", command=enviar_respuestas)
+    boton_enviar.pack(pady=20)
+
+def actualizar_estado_codigo(codigo_viaje):
+    if os.path.exists(BD_Codigos):
+        with open(BD_Codigos, "r") as f:
+            lineas = f.readlines()
+
+        with open(BD_Codigos, "w") as f:
+            for linea in lineas:
+                campos = linea.strip().split("\t")
+                if campos[0] == codigo_viaje and campos[1] == "Disponible":  # Buscar el código y su estado
+                    nueva_linea = f"{campos[0]}\tUtilizado\n"  # Cambiar estado a "Utilizado"
+                else:
+                    nueva_linea = linea  # Mantener los demás datos sin cambios
+                f.write(nueva_linea)
+
+def verificar_codigo_disponible(codigo_viaje):
+    """
+    Verifica si el código de viaje está disponible.
+    Retorna True si está disponible, de lo contrario False.
+    """
+    if os.path.exists(BD_Codigos):
+        with open(BD_Codigos, "r") as f:
+            for linea in f:
+                campos = linea.strip().split("\t")
+                if campos[0] == codigo_viaje and campos[1] == "Disponible":  # Comparar código y estado
+                    return True  # El código está disponible
+    return False  # El código no está disponible o no existe
+
+def Ventana_encuesta():
+
+    global Ventana_encuesta_abierta
+
+    if Ventana_encuesta_abierta is None or not Ventana_encuesta_abierta.winfo_exists():
+        # Solo crear la ventana si no existe o si se ha cerrado
+        Ventana_encuesta_abierta = tk.Toplevel()
+        Ventana_encuesta_abierta.title("Encuesta de Satisfacción")
+        Ventana_encuesta_abierta.geometry("500x400")
+        Ventana_encuesta_abierta.config(bg="dark green")
+
+        # Crear el frame dentro de la nueva ventana
+        frame_encuesta = tk.Frame(Ventana_encuesta_abierta, bg="dark green", padx=20, pady=20)
+        frame_encuesta.pack(expand=True)
+
+        # Título de la ventana
+        label_titulo = tk.Label(frame_encuesta, text="Encuesta de Satisfacción", font=("Arial", 16), bg="dark green")
+        label_titulo.grid(row=0, column=0, columnspan=2, pady=10)
+
+        # Etiqueta y entrada para usuario
+        label_codigo = tk.Label(frame_encuesta, text="Ingrese su código de viaje:", bg="dark green")
+        label_codigo.grid(row=1, column=0, pady=10, padx=10)
+
+        Texto_codigo = tk.Entry(frame_encuesta, justify="center")
+        Texto_codigo.grid(row=1, column=1, pady=10, padx=10)
+        codigo_viaje =Texto_codigo.get()
+        # Botón para verificar el código e iniciar la encuesta
+        boton_verificar_codigo = tk.Button(frame_encuesta, text="Verificar Código", command=lambda:Ventana_Llenar_encuesta(Texto_codigo))
+        boton_verificar_codigo.grid(row=2, column=0, columnspan=2, pady=10)
+
                 
 def enviar_correo_taxista(correo_destinatario_cliente, asunto, mensaje):
 # Configuracion del servidor SMTP
@@ -1260,6 +1446,8 @@ if __name__ =='__main__':
     boton_cliente = Button(frame_ventana_principal, text="Solicitar Viaje",command=Solicitar_taxi)
     boton_cliente.grid(row=3, column=0, columnspan=2, pady=20)
 
+    boton_encuesta = Button(frame_ventana_principal, text="Llenar Encuesta de Satisfaccion",command=Ventana_encuesta)
+    boton_encuesta.grid(row=4, column=0, columnspan=2, pady=20)
     
 
 
